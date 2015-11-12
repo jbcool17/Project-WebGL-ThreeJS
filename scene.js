@@ -17,12 +17,18 @@ controls = new THREE.OrbitControls( camera );
 //########################################################################
 light = new THREE.AmbientLight(0x000000);
 
-spotLight = new THREE.SpotLight(0x04ff04);
-spotLight.position.set( 0, 15, 1);
-spotLight.castShadow = true;
-var spotLightHelper = new THREE.SpotLightHelper( spotLight );
+spotLight = new THREE.SpotLight( 0xffffff );
+spotLight.position.set( 100, 1000, 100 );
 
-scene.add( spotLight, spotLightHelper );
+spotLight.castShadow = true;
+spotLight.shadowDarkness = 0.5;
+spotLight.shadowMapWidth = 2048;
+spotLight.shadowMapHeight = 2048;
+spotLight.shadowCameraNear = 500;
+spotLight.shadowCameraFar = 4000;
+spotLight.shadowCameraFov = 0.1; //shadow quality
+
+scene.add( light, spotLight );
 
 //########################################################################
 //RENDERER
@@ -31,6 +37,9 @@ renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setClearColor(0x21ccff, 1);
+renderer.shadowMap.enabled = true;
+//renderer.shadowMap.type = THREE.BasicShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; //soft shadow
 document.body.insertBefore(renderer.domElement, document.body.firstChild);
 
 
@@ -52,9 +61,10 @@ boxMaterialPhong = new THREE.MeshPhongMaterial({ color: 0x2194ce,
 												shading: THREE.FlatShading  });
 
 boxGeometry = new THREE.BoxGeometry( 1, 1, 1);
-box = new THREE.Mesh( boxGeometry, boxMaterialBasic );
-box.position.set( 0, 1, 0);
+box = new THREE.Mesh( boxGeometry, boxMaterialLambert );
+box.position.set( 0, 2, 0);
 box.castShadow = true;
+box.receiveShadow = true;
 
 	//setup colors
 for (var i = 0; i <12; i+=2) {
@@ -69,13 +79,12 @@ for (var i = 0; i <12; i+=2) {
 scene.add( box );
 
 
-var ground = new THREE.Mesh( new THREE.PlaneGeometry(100, 100, 1), boxMaterialPhong );
+var ground = new THREE.Mesh( new THREE.PlaneGeometry(100, 100, 1), new THREE.MeshPhongMaterial( { color: 0xffdd99 } ) );
 ground.rotateX( - Math.PI / 2 );
+ground.castShadow = false;
 ground.receiveShadow = true;
 
 scene.add( ground );
-
-
 
 //########################################################################
 //FUNCTIONS
@@ -92,6 +101,7 @@ var render = function () {
 
 	//Animations
 	box.rotation.y += 0.01;
+	box.rotation.x += 0.01;
 
 	controls.update();
 	renderer.render( scene, camera );
