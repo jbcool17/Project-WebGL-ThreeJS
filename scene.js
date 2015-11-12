@@ -22,7 +22,7 @@ spotLight.position.set( 0, 15, 1);
 spotLight.castShadow = true;
 var spotLightHelper = new THREE.SpotLightHelper( spotLight );
 
-scene.add( light, spotLight, spotLightHelper );
+scene.add( spotLight, spotLightHelper );
 
 //########################################################################
 //RENDERER
