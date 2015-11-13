@@ -1,5 +1,4 @@
-var scene, camera, renderer, light, spotLight, controls;
-
+var scene, camera, renderer, light, spotLight, controls, boxHolder = [];
 
 var mouse = new THREE.Vector2(), INTERSECTED;
 //########################################################################
@@ -11,7 +10,7 @@ scene = new THREE.Scene();
 //CAMERA
 //########################################################################
 camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set( 0, 1, 5);
+camera.position.set( 0, 5, 5);
 controls = new THREE.OrbitControls( camera );
 
 //########################################################################
@@ -78,7 +77,7 @@ for (var i = 0; i <12; i+=2) {
     box.geometry.faces[i].color.setRGB(r,g,b);
     box.geometry.faces[i+1].color.setRGB(r,g,b);                
 }
-raycastHold.push( box );
+boxHolder.push( box );
 scene.add( box );
 
 
@@ -94,12 +93,22 @@ scene.add( ground );
 //########################################################################
 var raycaster = new THREE.Raycaster();
 
-var createBox = function () {
-	
-	box = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1), 
-						  new THREE.MeshBasicMaterial({ color: 0x111111 }));
-	boxHolder.push( box );
-	scene.add( box );
+var maxPosition = 10;
+
+var createBox = function (total) {
+	for ( var i = 0; i < total; i++ ) {
+		
+		box = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1), 
+							  new THREE.MeshLambertMaterial({ color: 0x222222 }));
+
+		box.position.set( (Math.random() * maxPosition) - (maxPosition / 2), 
+						  (Math.random() * maxPosition), 
+						  (Math.random() * maxPosition) - (maxPosition / 2) );
+		box.name = 'box'
+		box.castShadow = true;
+		boxHolder.push( box );
+		scene.add( box );
+	}
 }
 
 var onWindowResize = function(event) {
@@ -115,8 +124,12 @@ var render = function () {
 	interactions();
 	
 	//Animations
-	box.rotation.y += 0.01;
-	box.rotation.x += 0.01;
+	for (var i = 0; i < scene.children.length; i++ ) {
+		if ( scene.children[i].name === 'box'){
+			scene.children[i].rotation.y += 0.01;
+			scene.children[i].rotation.x += 0.01;
+		}
+	}
 
 	controls.update();
 	renderer.render( scene, camera );
@@ -125,26 +138,31 @@ var render = function () {
 //########################################################################
 //INTERACTIONS
 //########################################################################
+var touches = 0;
+
 var interactions = function () {
 	raycaster.setFromCamera( mouse, camera );
 
-	var intersects = raycaster.intersectObjects( raycastHold ); //scene.children
+	var intersects = raycaster.intersectObjects( boxHolder ); //scene.children
 
 	if ( intersects.length > 0 ) {
 
 		if ( INTERSECTED != intersects[ 0 ].object ) {
 
-			if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+			if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
 
 			INTERSECTED = intersects[ 0 ].object;
-			INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-			INTERSECTED.material.emissive.setHex( 0xff0000 );
+			INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+			INTERSECTED.material.color.setHex( 0xff1111 );
+
+			touches += 1;
+			$('#touches').text(touches.toString());
 
 		}
 
 	} else {
 
-		if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+		if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
 
 		INTERSECTED = null;
 
@@ -162,8 +180,19 @@ var onDocumentMouseMove = function ( event ) {
 
         
 //ON PAGE LOAD
+var boxTotal = 0;
 $(document).ready(function() {
 	render();
 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	window.addEventListener( 'resize', onWindowResize, false );
+
+	$('#createBox').on('click', function() {
+		createBox(1);
+		boxTotal += 1;
+		$('#boxTotal').text(boxTotal.toString());
+
+
+	});
+
+	
 });
