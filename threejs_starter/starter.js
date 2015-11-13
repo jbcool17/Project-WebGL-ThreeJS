@@ -1,3 +1,7 @@
+//########################################################################
+//Start up your scene with a rotating cube
+//########################################################################
+
 var scene, camera, renderer, light, spotLight, controls;
 
 //########################################################################
@@ -10,8 +14,8 @@ scene = new THREE.Scene();
 //########################################################################
 camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set( 0, 2, 5);
+
 controls = new THREE.OrbitControls( camera );
-controls.autoRotate = true;
 
 //########################################################################
 //LIGHTS
@@ -20,7 +24,7 @@ light = new THREE.AmbientLight(0x000000);
 
 spotLight = new THREE.SpotLight( 0xffffff );
 spotLight.position.set( 100, 1000, 100 );
-
+	//shadows
 spotLight.castShadow = true;
 spotLight.shadowDarkness = 0.5;
 spotLight.shadowMapWidth = 2048;
