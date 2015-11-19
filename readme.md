@@ -2,7 +2,7 @@
 
 
 ### TODO 
-- setup a starter scene
+- setup a starter scenes w/Lights & Shadows
 - physics
 - interactions
 - materials

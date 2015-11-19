@@ -46,6 +46,7 @@ renderer.setClearColor(0x21ccff, 1);
 	//for shadows
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; //soft shadow
+	//add the scene
 document.body.insertBefore(renderer.domElement, document.body.firstChild);
 
 
