@@ -1,4 +1,4 @@
-var scene, camera, renderer, light, spotLight, controls, boxHolder = [];
+var scene, camera, renderer, light, spotLight, controls, boxHolder = [], boxTotal = 0;
 
 var mouse = new THREE.Vector2(), INTERSECTED;
 //########################################################################
@@ -12,6 +12,7 @@ scene = new THREE.Scene();
 camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set( 0, 5, 5);
 controls = new THREE.OrbitControls( camera );
+controls.autoRotate = true;
 
 //########################################################################
 //LIGHTS
@@ -86,7 +87,7 @@ ground.rotateX( - Math.PI / 2 );
 ground.castShadow = false;
 ground.receiveShadow = true;
 // raycastHold.push( ground );
-scene.add( ground );
+// scene.add( ground );
 
 //########################################################################
 //FUNCTIONS
@@ -108,6 +109,7 @@ var createBox = function (total) {
 		box.castShadow = true;
 		boxHolder.push( box );
 		scene.add( box );
+		boxTotal += 1;
 	}
 }
 
@@ -180,7 +182,7 @@ var onDocumentMouseMove = function ( event ) {
 
         
 //ON PAGE LOAD
-var boxTotal = 0;
+
 $(document).ready(function() {
 	render();
 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
@@ -188,11 +190,13 @@ $(document).ready(function() {
 
 	$('#createBox').on('click', function() {
 		createBox(1);
-		boxTotal += 1;
+		
 		$('#boxTotal').text(boxTotal.toString());
 
 
 	});
+
+	createBox(20);
 
 	
 });
