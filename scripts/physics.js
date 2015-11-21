@@ -1,22 +1,14 @@
 var scene, camera, renderer, light, spotLight, controls;
 
-Physijs.scripts.worker = 'bower_components/Physijs/physijs_worker.js';
-Physijs.scripts.ammo = 'bower_components/ammo.js/builds/ammo.js';
+Physijs.scripts.worker = '/bower_components/Physijs/physijs_worker.js';
+Physijs.scripts.ammo = '/bower_components/ammo.js/builds/ammo.js';
+
 //########################################################################
 //SCENE
 //########################################################################
-scene = new Physijs.Scene();
-
-	//Gavity
-scene.setGravity( new THREE.Vector3( 0, -25, 0 ));
-
-//########################################################################
-//CAMERA
-//########################################################################
-camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set( 0, 1, 5);
-controls = new THREE.OrbitControls( camera );
-
+scene = new Physijs.Scene(),
+ 
+scene.setGravity( new THREE.Vector3( 0, -25, 0 ) );
 //########################################################################
 //RENDERER
 //########################################################################
@@ -29,6 +21,14 @@ renderer.setClearColor(0x21ccff, 1); //Background Color
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; //soft shadow
 document.body.insertBefore(renderer.domElement, document.body.firstChild);
+
+//########################################################################
+//CAMERA
+//########################################################################
+camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set( 0, 15, 15);
+controls = new THREE.OrbitControls( camera );
+controls.autoRotate = true;
 
 //########################################################################
 //LIGHTS
@@ -47,79 +47,67 @@ spotLight.shadowCameraFar = 4000;
 spotLight.shadowCameraFov = 0.1; //shadow quality
 
 scene.add( light, spotLight );
-
-//########################################################################
-//OBJECTS
-//########################################################################
-	//Materials
-var boxMaterialBasic, boxMaterialLambert, boxMaterialPhong;
-
-boxMaterialBasic = new THREE.MeshBasicMaterial({ color: 0x0000ff }); //Blue Basic
-boxMaterialLambert = new THREE.MeshLambertMaterial({ color: 0x00ff00 }); //Green Lambert
-boxMaterialPhong = new THREE.MeshPhongMaterial({ color: 0x2194ce, 
-												emissive: 0x2194ce, 
-												specular: 0x111111, 
-												shininess: 100,
-												shading: THREE.FlatShading  });
+          
 
 
 
-var box = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xaaff00, wireframe: true }));
-box.position.set( 0, 1, 0);
-box.castShadow = true;
-box.receiveShadow = true;
-scene.add( box );
+    
+var boxMaterial= Physijs.createMaterial(
+    new THREE.MeshBasicMaterial({ color: 0xaaff00, wireframe: true }),
+    0, //friction
+    1 //restitution/bounciness
+);
+    
+box= new Physijs.BoxMesh(
+    new THREE.BoxGeometry( 15, 15, 15 ),
+    boxMaterial
+);
 
-var ground = new THREE.Mesh( new THREE.PlaneGeometry(100, 100, 1), new THREE.MeshPhongMaterial( { color: 0xcccccc } ) );
+box.position.y=40;
+box.rotation.z=90;
+box.rotation.y=50;
+
+box.addEventListener( 'collision', function( 
+    otherObject, 
+    relative_velocity, 
+    relative_rotation, 
+    contact_normal ) {
+    
+    if(otherObject.name=="ground"){
+       // alert('hit ground')
+       console.log('HIT');
+    }                
+
+});
+
+scene.add(box);           
+
+ var groundMaterial = Physijs.createMaterial(
+    new THREE.MeshPhongMaterial( { color: 0xcccccc } ),
+    0, //friction
+    0.5 //restitution/bounciness
+);
+
+ground = new Physijs.BoxMesh(
+    new THREE.PlaneGeometry(100, 100, 1),
+    groundMaterial,
+    0
+);
+
 ground.rotateX( - Math.PI / 2 );
 ground.castShadow = false;
 ground.receiveShadow = true;
-scene.add( ground );
-//########################################################################
-//FUNCTIONS
-//########################################################################
+ground.name='ground';
+ground.position.y = -25;
+scene.add( ground );           
 
+requestAnimationFrame(render);
 
-var onWindowResize = function(event) {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
+function render() {
+scene.simulate();
+renderer.render( scene, camera); 
 
-var render = function () {
-	requestAnimationFrame( render );
-	
-	//Animations
-	box.rotation.y += 0.01;
-	
-	controls.update();
-	renderer.render( scene, camera );
-}
-        
-//ON PAGE LOAD
-$(document).ready(function() {
-
-	render();
-
-	window.addEventListener( 'resize', onWindowResize, false );
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+requestAnimationFrame(render);
+};
 
 
